@@ -1,30 +1,15 @@
-1. собрать приложение mvn clean install
-2. проверить работу приложения возможно по этому ендпоинту: http://localhost:8091/app/actuator
-3. посмотреть сваггер возможно тут: http://localhost:8091/app/swagger-ui/index.html
-
-http://localhost:8091/app/api/v1/user/create
-
-{
-"userRequest": {
-"fullName": "test",
-"title": "reader",
-"age": 33
-},
-"bookRequests": [
-{
-"title": "book name",
-"author": "test author",
-"pageCount": 222
-},
-{
-"title": "book name test",
-"author": "test author second",
-"pageCount": 555
-}
-]
-}
-
-docker run --name postgres -d -p 15432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres postgres:alpine
+## Y_Lab Spring Education
 
 
-rqid requestId1010101
+### About project    
+- Service for working with users and their books.
+- You can add, update, get and delete users and their books using http requests with JSON body.
+
+### Home Works
+###### First Homework
+- Implement access to the storage from the services with JPA and JDBC.
+
+### Useful links for this application
+- Spring Actuator: http://localhost:8091/app/actuator
+- Swagger: http://localhost:8091/app/swagger-ui/index.html
+
