@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 
 import java.sql.PreparedStatement;
@@ -26,6 +25,7 @@ public class BookServiceImplTemplate implements BookService {
     /**
      * Create book by book dto.
      * Creating a book and saving it to a database with a unique identifier.
+     *
      * @param bookDto data for create book.
      * @return BookDto book dto with ID.
      */
@@ -57,6 +57,7 @@ public class BookServiceImplTemplate implements BookService {
     /**
      * Update book by book dto.
      * If the updated book is not in the database, then a new one is created.
+     *
      * @param bookDto book dto for update.
      * @return BookDto updated or created book dto.
      */
@@ -67,8 +68,20 @@ public class BookServiceImplTemplate implements BookService {
         final Long bookId = bookDto.getId();
 
         if (bookId != null && getBookById(bookId) != null) {
-            jdbcTemplate.update(UPDATE_SQL, bookDto.getTitle(), bookDto.getAuthor(), bookDto.getPageCount(), bookDto.getUserId(), bookId);
-            log.info("Updated book with id: {}", bookDto);
+            jdbcTemplate.update(
+                    connection -> {
+                        PreparedStatement ps =
+                                connection.prepareStatement(UPDATE_SQL);
+                        ps.setString(1, bookDto.getTitle());
+                        ps.setString(2, bookDto.getAuthor());
+                        ps.setLong(3, bookDto.getPageCount());
+                        ps.setLong(4, bookDto.getUserId());
+                        ps.setLong(5, bookDto.getId());
+
+                        return ps;
+                    });
+            log.info("Updated book with id: {}", bookId);
+            log.info("Updated book data: {}", bookDto);
 
             return bookDto;
         } else {
@@ -81,6 +94,7 @@ public class BookServiceImplTemplate implements BookService {
 
     /**
      * Getting a book by its ID from database.
+     *
      * @param id book ID.
      * @return BookDto if the book is found in the database. null if the book not found in the database.
      */
@@ -89,17 +103,22 @@ public class BookServiceImplTemplate implements BookService {
         log.info("Wants get book by book id: {}", id);
         final String GET_SQL = "SELECT * FROM BOOK WHERE ID = ?";
 
-        SqlRowSet bookRowSet = jdbcTemplate.queryForRowSet(GET_SQL, id);
+
         BookDto bookDto = null;
-        if (bookRowSet.first()) {
-            bookDto = BookDto.builder()
-                    .id(bookRowSet.getLong("ID"))
-                    .userId(bookRowSet.getLong("USER_ID"))
-                    .title(bookRowSet.getString("TITLE"))
-                    .author(bookRowSet.getString("AUTHOR"))
-                    .pageCount(bookRowSet.getInt("PAGE_COUNT"))
-                    .build();
+        List<BookDto> books = jdbcTemplate.query(GET_SQL,
+                ps -> ps.setLong(1, id),
+                (rs, rowNum) -> BookDto.builder()
+                        .id(rs.getLong("ID"))
+                        .userId(rs.getLong("USER_ID"))
+                        .title(rs.getString("TITLE"))
+                        .author(rs.getString("AUTHOR"))
+                        .pageCount(rs.getInt("PAGE_COUNT"))
+                        .build());
+
+        if (!books.isEmpty()) {
+            bookDto = books.get(0);
         }
+
         log.info("Received book: {}", bookDto);
 
         return bookDto;
@@ -108,6 +127,7 @@ public class BookServiceImplTemplate implements BookService {
     /**
      * Deleting a book from the database by its ID.
      * If there is no book with this ID, then nothing happens.
+     *
      * @param id book ID.
      */
     @Override
@@ -115,13 +135,20 @@ public class BookServiceImplTemplate implements BookService {
         log.info("Got delete book by book id: {}", id);
         final String DELETE_SQL = "DELETE FROM BOOK WHERE ID = ?";
 
-        jdbcTemplate.update(DELETE_SQL, id);
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(DELETE_SQL);
+            ps.setLong(1, id);
+
+            return ps;
+        });
+
         log.info("Book was deleted with id: {}", id);
     }
 
     /**
      * Getting a list of IDs of books that belong to a user with userId.
      * SQL query gets a list of book IDs by userId.
+     *
      * @param userId user id.
      * @return List<Long> list of user book ids.
      */
@@ -130,7 +157,9 @@ public class BookServiceImplTemplate implements BookService {
         log.info("Wants get all books by user id: {}", userId);
         final String GET_ALL_BOOKS_ID_BY_USER_ID_SQL = "SELECT ID FROM BOOK WHERE USER_ID = ?";
 
-        List<Long> allBooksIdByUserId = jdbcTemplate.query(GET_ALL_BOOKS_ID_BY_USER_ID_SQL, (rs, row) -> rs.getLong("ID"), userId);
+        List<Long> allBooksIdByUserId = jdbcTemplate.query(GET_ALL_BOOKS_ID_BY_USER_ID_SQL,
+                ps -> ps.setLong(1, userId),
+                (rs , rowNum) -> rs.getLong("ID"));
 
         log.info("Received all books by user id: {}", allBooksIdByUserId);
         return allBooksIdByUserId;
