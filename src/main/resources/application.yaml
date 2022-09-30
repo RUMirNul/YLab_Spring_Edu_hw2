@@ -10,6 +10,8 @@ spring:
     url: jdbc:h2:mem:userbook
     username: test
     password: test
+  jpa:
+    show-sql: true
 
 server:
   port: 8091
