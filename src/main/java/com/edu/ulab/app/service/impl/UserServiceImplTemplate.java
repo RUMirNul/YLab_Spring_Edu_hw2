@@ -1,6 +1,7 @@
 package com.edu.ulab.app.service.impl;
 
 import com.edu.ulab.app.dto.UserDto;
+import com.edu.ulab.app.mapper.UserRowMapper;
 import com.edu.ulab.app.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,9 +17,11 @@ import java.util.Objects;
 @Service
 public class UserServiceImplTemplate implements UserService {
     private final JdbcTemplate jdbcTemplate;
+    private final UserRowMapper userRowMapper;
 
-    public UserServiceImplTemplate(JdbcTemplate jdbcTemplate) {
+    public UserServiceImplTemplate(JdbcTemplate jdbcTemplate, UserRowMapper userRowMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.userRowMapper = userRowMapper;
     }
 
     /**
@@ -97,14 +100,7 @@ public class UserServiceImplTemplate implements UserService {
         final String GET_SQL = "SELECT * FROM PERSON WHERE ID = ?";
 
         UserDto userDto = null;
-        List<UserDto> users = jdbcTemplate.query(GET_SQL,
-                ps -> ps.setLong(1, id),
-                (rs, rowNum) -> UserDto.builder()
-                        .id(rs.getLong("ID"))
-                        .fullName(rs.getString("FULL_NAME"))
-                        .title(rs.getString("TITLE"))
-                        .age(rs.getInt("AGE"))
-                        .build());
+        List<UserDto> users = jdbcTemplate.query(GET_SQL, ps -> ps.setLong(1, id), userRowMapper);
 
         if (!users.isEmpty()) {
             userDto = users.get(0);

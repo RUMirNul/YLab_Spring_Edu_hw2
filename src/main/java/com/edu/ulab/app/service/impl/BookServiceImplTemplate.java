@@ -1,6 +1,7 @@
 package com.edu.ulab.app.service.impl;
 
 import com.edu.ulab.app.dto.BookDto;
+import com.edu.ulab.app.mapper.BookRowMapper;
 import com.edu.ulab.app.service.BookService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,9 +18,11 @@ import java.util.Objects;
 public class BookServiceImplTemplate implements BookService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final BookRowMapper bookRowMapper;
 
-    public BookServiceImplTemplate(JdbcTemplate jdbcTemplate) {
+    public BookServiceImplTemplate(JdbcTemplate jdbcTemplate, BookRowMapper bookRowMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.bookRowMapper = bookRowMapper;
     }
 
     /**
@@ -103,17 +106,8 @@ public class BookServiceImplTemplate implements BookService {
         log.info("Wants get book by book id: {}", id);
         final String GET_SQL = "SELECT * FROM BOOK WHERE ID = ?";
 
-
         BookDto bookDto = null;
-        List<BookDto> books = jdbcTemplate.query(GET_SQL,
-                ps -> ps.setLong(1, id),
-                (rs, rowNum) -> BookDto.builder()
-                        .id(rs.getLong("ID"))
-                        .userId(rs.getLong("USER_ID"))
-                        .title(rs.getString("TITLE"))
-                        .author(rs.getString("AUTHOR"))
-                        .pageCount(rs.getInt("PAGE_COUNT"))
-                        .build());
+        List<BookDto> books = jdbcTemplate.query(GET_SQL, ps -> ps.setLong(1, id), bookRowMapper);
 
         if (!books.isEmpty()) {
             bookDto = books.get(0);
