@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface BookRepository extends CrudRepository<Book, Long> {
 
-    @Query("select b.id from Book b where b.userId = :userId")
+    @Query("select b.id from Book b where b.person.id = :userId")
     List<Long> findAllBooksIdByUserId(long userId);
 }

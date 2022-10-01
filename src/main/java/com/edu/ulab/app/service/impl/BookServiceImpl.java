@@ -105,6 +105,7 @@ public class BookServiceImpl implements BookService {
      * @param userId user id.
      * @return List<Long> list of user book ids.
      */
+    //TODO исправить
     @Override
     public List<Long> findAllBooksIdByUserId(Long userId) {
         log.info("Wants get all books by user id: {}", userId);
@@ -114,4 +115,5 @@ public class BookServiceImpl implements BookService {
 
         return allBooksIdByUserId;
     }
+
 }
