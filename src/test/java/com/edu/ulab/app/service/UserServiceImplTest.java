@@ -1,9 +1,8 @@
 package com.edu.ulab.app.service;
 
-import com.edu.ulab.app.dto.BookDto;
 import com.edu.ulab.app.dto.UserDto;
-import com.edu.ulab.app.entity.Book;
 import com.edu.ulab.app.entity.Person;
+import com.edu.ulab.app.exception.NotFoundException;
 import com.edu.ulab.app.mapper.UserMapper;
 import com.edu.ulab.app.repository.UserRepository;
 import com.edu.ulab.app.service.impl.UserServiceImpl;
@@ -12,11 +11,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Optional;
+import java.util.Random;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -35,57 +38,161 @@ public class UserServiceImplTest {
     @Mock
     UserMapper userMapper;
 
+    private final static Random RANDOM = new Random();
+    private final static String USER_FULL_NAME = "test name";
+    private final static String USER_TITLE = "test title";
+
     @Test
     @DisplayName("Создание пользователя. Должно пройти успешно.")
-    void savePerson_Test() {
+    void saveUser_Test() {
         //given
+        int userAge = RANDOM.nextInt(1, 100);
+        long userId = RANDOM.nextLong(1, 100000);
 
         UserDto userDto = new UserDto();
-        userDto.setAge(11);
-        userDto.setFullName("test name");
-        userDto.setTitle("test title");
+        userDto.setFullName(USER_FULL_NAME);
+        userDto.setTitle(USER_TITLE);
+        userDto.setAge(userAge);
 
-        Person person  = new Person();
-        person.setFullName("test name");
-        person.setAge(11);
-        person.setTitle("test title");
+        Person person = new Person();
+        person.setFullName(USER_FULL_NAME);
+        person.setTitle(USER_TITLE);
+        person.setAge(userAge);
 
-        Person savedPerson  = new Person();
-        savedPerson.setId(1);
-        savedPerson.setFullName("test name");
-        savedPerson.setAge(11);
-        savedPerson.setTitle("test title");
+
+        Person savedPerson = new Person();
+        savedPerson.setId(userId);
+        savedPerson.setFullName(USER_FULL_NAME);
+        savedPerson.setTitle(USER_TITLE);
+        savedPerson.setAge(userAge);
 
         UserDto result = new UserDto();
-        result.setId(1L);
-        result.setAge(11);
-        result.setFullName("test name");
-        result.setTitle("test title");
-
+        result.setId(userId);
+        result.setFullName(USER_FULL_NAME);
+        result.setTitle(USER_TITLE);
+        result.setAge(userAge);
 
         //when
-
         when(userMapper.userDtoToPerson(userDto)).thenReturn(person);
         when(userRepository.save(person)).thenReturn(savedPerson);
         when(userMapper.personToUserDto(savedPerson)).thenReturn(result);
 
-
         //then
-
         UserDto userDtoResult = userService.createUser(userDto);
-        assertEquals(1L, userDtoResult.getId());
+        assertEquals(userId, userDtoResult.getId());
+        assertEquals(USER_FULL_NAME, userDtoResult.getFullName());
+        assertEquals(USER_TITLE, userDtoResult.getTitle());
+        assertEquals(userAge, userDtoResult.getAge());
     }
 
     // update
-    // get
-    // get all
-    // delete
+    @Test
+    @DisplayName("Обновление пользователя. Должно пройти успешно.")
+    void updateUser_Test() {
+        // given
+        int userAge = RANDOM.nextInt(1, 100);
+        long userId = RANDOM.nextLong(1, 100000);
 
-    // * failed
-    //         doThrow(dataInvalidException).when(testRepository)
-    //                .save(same(test));
-    // example failed
-    //  assertThatThrownBy(() -> testeService.createTest(testRequest))
-    //                .isInstanceOf(DataInvalidException.class)
-    //                .hasMessage("Invalid data set");
+        UserDto userDto = new UserDto();
+        userDto.setId(userId);
+        userDto.setFullName(USER_FULL_NAME);
+        userDto.setTitle(USER_TITLE);
+        userDto.setAge(userAge);
+
+        Person person = new Person();
+        person.setId(userId);
+        person.setFullName(USER_FULL_NAME);
+        person.setTitle(USER_TITLE);
+        person.setAge(userAge);
+
+        Person savedPerson = new Person();
+        savedPerson.setId(userId);
+        savedPerson.setFullName(USER_FULL_NAME);
+        savedPerson.setTitle(USER_TITLE);
+        savedPerson.setAge(userAge);
+
+        UserDto result = new UserDto();
+        result.setId(userId);
+        result.setFullName(USER_FULL_NAME);
+        result.setTitle(USER_TITLE);
+        result.setAge(userAge);
+
+        // when
+        when(userMapper.userDtoToPerson(userDto)).thenReturn(person);
+        when(userRepository.save(person)).thenReturn(savedPerson);
+        when(userMapper.personToUserDto(savedPerson)).thenReturn(result);
+
+        // then
+        UserDto userDtoResult = userService.updateUser(userDto);
+        assertEquals(userId, userDtoResult.getId());
+        assertEquals(USER_FULL_NAME, userDtoResult.getFullName());
+        assertEquals(USER_TITLE, userDtoResult.getTitle());
+        assertEquals(userAge, userDtoResult.getAge());
+    }
+
+
+    // get
+    @Test
+    @DisplayName("Получение пользователя. Должно пройти успешно.")
+    void getUserById_Test() {
+        // given
+        int userAge = RANDOM.nextInt(1, 100);
+        long userId = RANDOM.nextLong(1, 100000);
+
+        UserDto userDto = new UserDto();
+        userDto.setId(userId);
+        userDto.setFullName(USER_FULL_NAME);
+        userDto.setTitle(USER_TITLE);
+        userDto.setAge(userAge);
+
+        Person person = new Person();
+        person.setId(userId);
+        person.setFullName(USER_FULL_NAME);
+        person.setTitle(USER_TITLE);
+        person.setAge(userAge);
+
+        Person savedPerson = new Person();
+        savedPerson.setId(userId);
+        savedPerson.setFullName(USER_FULL_NAME);
+        savedPerson.setTitle(USER_TITLE);
+        savedPerson.setAge(userAge);
+
+        UserDto result = new UserDto();
+        result.setId(userId);
+        result.setFullName(USER_FULL_NAME);
+        result.setTitle(USER_TITLE);
+        result.setAge(userAge);
+
+        // when
+        when(userRepository.findById(userId)).thenReturn(Optional.of(person));
+        when(userMapper.personToUserDto(person)).thenReturn(result);
+
+        // then
+        UserDto userDtoResult = userService.getUserById(userId);
+        assertEquals(userId, userDtoResult.getId());
+        assertEquals(USER_FULL_NAME, userDtoResult.getFullName());
+        assertEquals(USER_TITLE, userDtoResult.getTitle());
+        assertEquals(userAge, userDtoResult.getAge());
+    }
+
+    @Test
+    @DisplayName("Получение пользователя c id = null. Должно выбросить ошибку.")
+    void getUser_WithNullArgument_Exception_Test() {
+        assertThatThrownBy(() -> userService.getUserById(null))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    // delete
+    @Test
+    @DisplayName("Удаление пользователя. Должно пройти успешно.")
+    void deleteUser_Test() {
+        // given
+        long userId = RANDOM.nextLong(1, 100000);
+
+        // when
+        userService.deleteUserById(userId);
+
+        // then
+        verify(userRepository).deleteById(userId);
+    }
 }
