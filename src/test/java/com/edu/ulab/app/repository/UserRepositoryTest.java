@@ -44,7 +44,7 @@ public class UserRepositoryTest {
         SQLStatementCountValidator.reset();
     }
 
-    @DisplayName("Сохранить юзера. Число select должно равняться 1")
+    @DisplayName("Сохранить юзера. Число select должно равняться 1.")
     @Test
     @Rollback
     @Sql({"classpath:sql/1_clear_schema.sql",
@@ -54,10 +54,11 @@ public class UserRepositoryTest {
     void insertPerson_thenAssertDmlCount() {
         //Given
         int userAge = RANDOM.nextInt(1, 100);
-        Person person = new Person();
-        person.setFullName(PERSON_FULL_NAME);
-        person.setTitle(PERSON_TITLE);
-        person.setAge(userAge);
+        Person person = Person.builder()
+                .fullName(PERSON_FULL_NAME)
+                .title(PERSON_TITLE)
+                .age(userAge)
+                .build();
 
         //When
         Person result = userRepository.save(person);
@@ -74,8 +75,25 @@ public class UserRepositoryTest {
         assertDeleteCount(0);
     }
 
+    @DisplayName("Сохранить пользователя с Person = null. Должно выбросить ошибку.")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+            "classpath:sql/2_insert_person_data.sql",
+            "classpath:sql/3_insert_book_data.sql"
+    })
+    void createPerson_WithNullArgument_Exception_Test() {
+
+        //When
+        Throwable throwable = catchThrowable(() -> userRepository.save(null));
+
+        //Then
+        assertThat(throwable).hasRootCauseInstanceOf(IllegalArgumentException.class);
+
+    }
+
     // update
-    @DisplayName("Обновить пользователя. Число update должно равняться 1")
+    @DisplayName("Обновить пользователя. Число update должно равняться 1.")
     @Test
     @Rollback
     @Sql({"classpath:sql/1_clear_schema.sql",
@@ -83,20 +101,20 @@ public class UserRepositoryTest {
             "classpath:sql/3_insert_book_data.sql"
     })
     void updatePerson_thenAssertDmlCount() {
-        // Given
+        //Given
         int userAge = RANDOM.nextInt(1, 100);
 
-        Person person = new Person();
-        person.setId(DEFAULT_PERSON_ID);
-        person.setFullName(PERSON_FULL_NAME);
-        person.setTitle(PERSON_TITLE);
-        person.setAge(userAge);
+        Person person = Person.builder()
+                .id(DEFAULT_PERSON_ID)
+                .fullName(PERSON_FULL_NAME)
+                .title(PERSON_TITLE)
+                .age(userAge)
+                .build();
 
-
-        // When
+        //When
         Person result = userRepository.save(person);
 
-        // Then
+        //Then
         assertNotNull(result.getId());
         assertEquals(DEFAULT_PERSON_ID, result.getId());
         assertEquals(PERSON_FULL_NAME, result.getFullName());
@@ -118,10 +136,10 @@ public class UserRepositoryTest {
             "classpath:sql/3_insert_book_data.sql"
     })
     void update_WithNullArgument_Exception_Test() {
-        // when
+        //When
         Throwable throwable = catchThrowable(() -> userRepository.save(null));
 
-        // then
+        //Then
         assertThat(throwable)
                 .isInstanceOf(InvalidDataAccessApiUsageException.class)
                 .hasRootCauseInstanceOf(IllegalArgumentException.class);
@@ -129,7 +147,7 @@ public class UserRepositoryTest {
 
 
     // get
-    @DisplayName("Получить пользователя. Число select должно равняться 1")
+    @DisplayName("Получить пользователя. Число select должно равняться 1.")
     @Test
     @Rollback
     @Sql({"classpath:sql/1_clear_schema.sql",
@@ -138,10 +156,10 @@ public class UserRepositoryTest {
     })
     void getPerson_thenAssertDmlCount() {
 
-        // When
+        //When
         Person result = userRepository.findById(DEFAULT_PERSON_ID).orElseThrow();
 
-        // Then
+        //Then
         assertNotNull(result.getId());
         assertEquals(DEFAULT_PERSON_ID, result.getId());
         assertEquals(DEFAULT_PERSON_FULL_NAME, result.getFullName());
@@ -163,16 +181,16 @@ public class UserRepositoryTest {
     })
     void getPerson_WithNullArgument_Exception_Test() {
 
-        // when
+        //When
         Throwable throwable = catchThrowable(() -> userRepository.findById(null));
 
-        // then
+        //Then
         assertThat(throwable).isInstanceOf(InvalidDataAccessApiUsageException.class);
     }
 
     // get all
 
-    @DisplayName("Получить всех пользователей. Число select должно равняться 1")
+    @DisplayName("Получить всех пользователей. Число select должно равняться 1.")
     @Test
     @Rollback
     @Sql({"classpath:sql/1_clear_schema.sql",
@@ -180,10 +198,10 @@ public class UserRepositoryTest {
             "classpath:sql/3_insert_book_data.sql"
     })
     void getAllBooks_thenAssertDmlCount() {
-        // When
+        //When
         List<Person> allPerson = userRepository.findAll();
 
-        // Then
+        //Then
         assertEquals(DEFAULT_PERSON_COUNT_IN_DB, allPerson.size());
 
         assertSelectCount(1);
@@ -194,7 +212,7 @@ public class UserRepositoryTest {
     }
 
     // delete
-    @DisplayName("Удалить пользователя. Число delete должно равняться 1")
+    @DisplayName("Удалить пользователя. Число delete должно равняться 1.")
     @Test
     @Rollback
     @Sql({"classpath:sql/1_clear_schema.sql",
@@ -202,10 +220,10 @@ public class UserRepositoryTest {
             "classpath:sql/3_insert_book_data.sql"
     })
     void deletePerson_thenAssertDmlCount() {
-        // When
+        //When
         userRepository.deleteById(DEFAULT_PERSON_ID);
 
-        // Then
+        //Then
         assertSelectCount(1);
         assertInsertCount(0);
         assertUpdateCount(0);
@@ -220,9 +238,9 @@ public class UserRepositoryTest {
             "classpath:sql/3_insert_book_data.sql"
     })
     void deletePersonWithIdThatDoesntExist() {
-        // When
+        //When
         Throwable throwable = catchThrowable(() -> userRepository.deleteById(1509L));
-        // Then
+        //Then
         assertThat(throwable).isInstanceOf(EmptyResultDataAccessException.class);
     }
 
@@ -234,10 +252,10 @@ public class UserRepositoryTest {
             "classpath:sql/3_insert_book_data.sql"
     })
     void deletePerson_WithNullArgument_Exception_Test() {
-        // When
+        //When
         Throwable throwable = catchThrowable(() -> userRepository.deleteById(null));
 
-        // Then
+        //Then
         assertThat(throwable).hasRootCauseInstanceOf(IllegalArgumentException.class);
 
     }

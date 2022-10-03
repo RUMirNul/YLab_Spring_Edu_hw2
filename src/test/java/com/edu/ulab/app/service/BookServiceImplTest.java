@@ -50,49 +50,51 @@ public class BookServiceImplTest {
     @Test
     @DisplayName("Создание книги. Должно пройти успешно.")
     void saveBook_Test() {
-        //given
+        //Given
         long pageCount = RANDOM.nextLong(1, 10000);
         long bookId = RANDOM.nextLong(1, 100000);
         long userId = RANDOM.nextLong(1, 100000);
 
-        Person person = new Person();
-        person.setId(userId);
+        Person person = Person.builder().id(userId).build();
 
-        BookDto bookDto = new BookDto();
-        bookDto.setUserId(userId);
-        bookDto.setAuthor(BOOK_AUTHOR);
-        bookDto.setTitle(BOOK_TITLE);
-        bookDto.setPageCount(pageCount);
+        BookDto bookDto = BookDto.builder()
+                .userId(userId)
+                .author(BOOK_AUTHOR)
+                .title(BOOK_TITLE)
+                .pageCount(pageCount)
+                .build();
 
-        BookDto result = new BookDto();
-        result.setId(bookId);
-        result.setUserId(userId);
-        result.setAuthor(BOOK_AUTHOR);
-        result.setTitle(BOOK_TITLE);
-        result.setPageCount(pageCount);
+        BookDto result = BookDto.builder()
+                .id(bookId)
+                .userId(userId)
+                .author(BOOK_AUTHOR)
+                .title(BOOK_TITLE)
+                .pageCount(pageCount)
+                .build();
 
-        Book book = new Book();
-        book.setPageCount(1000);
-        book.setAuthor(BOOK_AUTHOR);
-        book.setTitle(BOOK_TITLE);
-        book.setPerson(person);
+        Book book = Book.builder()
+                .author(BOOK_AUTHOR)
+                .title(BOOK_TITLE)
+                .pageCount(pageCount)
+                .person(person)
+                .build();
 
-        Book savedBook = new Book();
-        savedBook.setId(pageCount);
-        savedBook.setPageCount(pageCount);
-        savedBook.setTitle(BOOK_TITLE);
-        savedBook.setAuthor(BOOK_AUTHOR);
-        savedBook.setPerson(person);
+        Book savedBook = Book.builder()
+                .id(bookId)
+                .author(BOOK_AUTHOR)
+                .title(BOOK_TITLE)
+                .pageCount(pageCount)
+                .person(person)
+                .build();
 
-        //when
-
+        //When
         when(bookMapper.bookDtoToBook(bookDto)).thenReturn(book);
         when(userRepository.findById(bookDto.getUserId())).thenReturn(Optional.of(person));
         when(bookRepository.save(book)).thenReturn(savedBook);
         when(bookMapper.bookToBookDto(savedBook)).thenReturn(result);
 
 
-        //then
+        //Then
         BookDto bookDtoResult = bookService.createBook(bookDto);
         assertEquals(bookId, bookDtoResult.getId());
         assertEquals(userId, bookDtoResult.getUserId());
@@ -112,50 +114,53 @@ public class BookServiceImplTest {
     @Test
     @DisplayName("Обновление книги. Должно пройти успешно.")
     void updateBook_Test() {
-        // given
+        //Given
         long pageCount = RANDOM.nextLong(1, 10000);
         long bookId = RANDOM.nextLong(1, 100000);
         long userId = RANDOM.nextLong(1, 100000);
 
-        Person person = new Person();
-        person.setId(userId);
+        Person person = Person.builder().id(userId).build();
 
-        BookDto bookDto = new BookDto();
-        bookDto.setUserId(userId);
-        bookDto.setAuthor(BOOK_AUTHOR);
-        bookDto.setTitle(BOOK_TITLE);
-        bookDto.setPageCount(pageCount);
+        BookDto bookDto = BookDto.builder()
+                .userId(userId)
+                .author(BOOK_AUTHOR)
+                .title(BOOK_TITLE)
+                .pageCount(pageCount)
+                .build();
 
-        BookDto result = new BookDto();
-        result.setId(bookId);
-        result.setUserId(userId);
-        result.setAuthor(BOOK_AUTHOR);
-        result.setTitle(BOOK_TITLE);
-        result.setPageCount(pageCount);
-
-
-        Book book = new Book();
-        book.setId(bookId);
-        book.setAuthor(BOOK_AUTHOR);
-        book.setTitle(BOOK_TITLE);
-        book.setPageCount(pageCount);
-        book.setPerson(person);
+        BookDto result = BookDto.builder()
+                .id(bookId)
+                .userId(userId)
+                .author(BOOK_AUTHOR)
+                .title(BOOK_TITLE)
+                .pageCount(pageCount)
+                .build();
 
 
-        Book savedBook = new Book();
-        savedBook.setId(bookId);
-        savedBook.setAuthor(BOOK_AUTHOR);
-        savedBook.setTitle(BOOK_TITLE);
-        savedBook.setPageCount(pageCount);
-        savedBook.setPerson(person);
+        Book book = Book.builder()
+                .id(bookId)
+                .author(BOOK_AUTHOR)
+                .title(BOOK_TITLE)
+                .pageCount(pageCount)
+                .person(person)
+                .build();
 
 
-        // when
+        Book savedBook = Book.builder()
+                .id(bookId)
+                .author(BOOK_AUTHOR)
+                .title(BOOK_TITLE)
+                .pageCount(pageCount)
+                .person(person)
+                .build();
+
+
+        //When
         when(bookMapper.bookDtoToBook(bookDto)).thenReturn(book);
         when(bookRepository.save(book)).thenReturn(savedBook);
         when(bookMapper.bookToBookDto(savedBook)).thenReturn(result);
 
-        // then
+        //Then
         BookDto bookDtoResult = bookService.updateBook(bookDto);
         assertEquals(bookId, bookDtoResult.getId());
         assertEquals(userId, bookDtoResult.getUserId());
@@ -168,7 +173,7 @@ public class BookServiceImplTest {
     @Test
     @DisplayName("Получение книги. Должно пройти успешно.")
     void getBookById_Test() {
-        // given
+        //Given
         long pageCount = RANDOM.nextLong(1, 10000);
         long bookId = RANDOM.nextLong(1, 100000);
         long userId = RANDOM.nextLong(1, 100000);
@@ -176,24 +181,26 @@ public class BookServiceImplTest {
         Person person = new Person();
         person.setId(userId);
 
-        Book book = new Book();
-        book.setAuthor(BOOK_AUTHOR);
-        book.setTitle(BOOK_TITLE);
-        book.setPageCount(pageCount);
-        book.setPerson(person);
+        Book book = Book.builder()
+                .author(BOOK_AUTHOR)
+                .title(BOOK_TITLE)
+                .pageCount(pageCount)
+                .person(person)
+                .build();
 
-        BookDto result = new BookDto();
-        result.setId(bookId);
-        result.setUserId(userId);
-        result.setAuthor(BOOK_AUTHOR);
-        result.setTitle(BOOK_TITLE);
-        result.setPageCount(pageCount);
+        BookDto result = BookDto.builder()
+                .id(bookId)
+                .userId(userId)
+                .author(BOOK_AUTHOR)
+                .title(BOOK_TITLE)
+                .pageCount(pageCount)
+                .build();
 
-        // when
+        //When
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
         when(bookMapper.bookToBookDto(book)).thenReturn(result);
 
-        // then
+        //Then
         BookDto bookDtoResult = bookService.getBookById(bookId);
         assertEquals(bookId, bookDtoResult.getId());
         assertEquals(userId, bookDtoResult.getUserId());
@@ -213,36 +220,37 @@ public class BookServiceImplTest {
     @Test
     @DisplayName("Получение всех id книг с нужным userId. Должно пройти успешно.")
     void getAllBooksIdByUserId_Test() {
-        // given
+        //Given
         long pageCount = RANDOM.nextLong(1, 10000);
         long bookId = RANDOM.nextLong(1, 100000);
         long userId = RANDOM.nextLong(1, 100000);
 
-        Person person = new Person();
-        person.setId(userId);
+        Person person = Person.builder().id(userId).build();
 
         List<Long> allBooksIdByUserId = new ArrayList<>();
 
-        Book book = new Book();
-        book.setAuthor(BOOK_AUTHOR);
-        book.setTitle(BOOK_TITLE);
-        book.setPageCount(pageCount);
-        book.setPerson(person);
+        Book book = Book.builder()
+                .author(BOOK_AUTHOR)
+                .title(BOOK_TITLE)
+                .pageCount(pageCount)
+                .person(person)
+                .build();
 
-        BookDto bookDto = new BookDto();
-        bookDto.setId(bookId);
-        bookDto.setUserId(userId);
-        bookDto.setAuthor(BOOK_AUTHOR);
-        bookDto.setTitle(BOOK_TITLE);
-        bookDto.setPageCount(pageCount);
+        BookDto bookDto = BookDto.builder()
+                .id(bookId)
+                .userId(userId)
+                .author(BOOK_AUTHOR)
+                .title(BOOK_TITLE)
+                .pageCount(pageCount)
+                .build();
 
         allBooksIdByUserId.add(bookId);
 
-        // when
+        //When
         when(bookRepository.findAllBooksIdByUserId(userId)).thenReturn(allBooksIdByUserId);
         when(bookMapper.bookToBookDto(book)).thenReturn(bookDto);
 
-        // then
+        //Then
         assertThat(bookService.findAllBooksIdByUserId(userId)).isEqualTo(allBooksIdByUserId);
     }
 
@@ -258,13 +266,13 @@ public class BookServiceImplTest {
     @Test
     @DisplayName("Удаление книги. Должно пройти успешно.")
     void deleteBook_Test() {
-        // given
+        //Given
         long bookId = RANDOM.nextLong(1, 100000);
 
-        // when
+        //When
         bookService.deleteBookById(bookId);
 
-        // then
+        //Then
         verify(bookRepository).deleteById(bookId);
     }
 

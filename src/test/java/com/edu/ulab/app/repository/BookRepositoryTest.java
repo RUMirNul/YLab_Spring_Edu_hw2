@@ -47,7 +47,7 @@ public class BookRepositoryTest {
         SQLStatementCountValidator.reset();
     }
 
-    @DisplayName("Сохранить книгу и автора. Число select должно равняться 2")
+    @DisplayName("Сохранить книгу и автора. Число select должно равняться 2.")
     @Test
     @Rollback
     @Sql({"classpath:sql/1_clear_schema.sql",
@@ -59,19 +59,20 @@ public class BookRepositoryTest {
         int userAge = RANDOM.nextInt(1, 100);
         long bookPageCount = RANDOM.nextLong(1, 1000);
 
-        Person person = new Person();
-        person.setFullName(USER_FULL_NAME);
-        person.setTitle(USER_TITLE);
-        person.setAge(userAge);
-
+        Person person = Person.builder()
+                .fullName(USER_FULL_NAME)
+                .title(USER_TITLE)
+                .age(userAge)
+                .build();
 
         Person savedPerson = userRepository.save(person);
 
-        Book book = new Book();
-        book.setAuthor(BOOK_AUTHOR);
-        book.setTitle(BOOK_TITLE);
-        book.setPageCount(bookPageCount);
-        book.setPerson(savedPerson);
+        Book book = Book.builder()
+                .author(BOOK_AUTHOR)
+                .title(BOOK_TITLE)
+                .pageCount(bookPageCount)
+                .person(savedPerson)
+                .build();
 
         //When
         Book result = bookRepository.save(book);
@@ -88,8 +89,25 @@ public class BookRepositoryTest {
         assertDeleteCount(0);
     }
 
+    @DisplayName("Сохранить книгу с Book = null. Должно выбросить ошибку.")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+            "classpath:sql/2_insert_person_data.sql",
+            "classpath:sql/3_insert_book_data.sql"
+    })
+    void createBook_WithNullArgument_Exception_Test() {
+
+        //When
+        Throwable throwable = catchThrowable(() -> bookRepository.save(null));
+
+        //Then
+        assertThat(throwable).hasRootCauseInstanceOf(IllegalArgumentException.class);
+
+    }
+
     // update
-    @DisplayName("Обновить книгу. Число update должно равняться 1")
+    @DisplayName("Обновить книгу. Число select должно равняться 1")
     @Test
     @Rollback
     @Sql({"classpath:sql/1_clear_schema.sql",
@@ -97,18 +115,19 @@ public class BookRepositoryTest {
             "classpath:sql/3_insert_book_data.sql"
     })
     void updateBook_thenAssertDmlCount() {
-        // Given
+        //Given
         long bookPageCount = RANDOM.nextLong(1, 1000);
-        Book book = new Book();
-        book.setId(DEFAULT_BOOK_ID);
-        book.setAuthor(BOOK_AUTHOR);
-        book.setTitle(BOOK_TITLE);
-        book.setPageCount(bookPageCount);
+        Book book = Book.builder()
+                .id(DEFAULT_BOOK_ID)
+                .author(BOOK_AUTHOR)
+                .title(BOOK_TITLE)
+                .pageCount(bookPageCount)
+                .build();
 
-        // When
+        //When
         Book result = bookRepository.save(book);
 
-        // Then
+        //Then
         assertEquals(DEFAULT_BOOK_ID, result.getId());
         assertEquals(BOOK_AUTHOR, result.getAuthor());
         assertEquals(BOOK_TITLE, result.getTitle());
@@ -129,10 +148,10 @@ public class BookRepositoryTest {
             "classpath:sql/3_insert_book_data.sql"
     })
     void updateBook_WithNullArgument_Exception_Test() {
-        // when
+        //When
         Throwable throwable = catchThrowable(() -> bookRepository.save(null));
 
-        // then
+        //Then
         assertThat(throwable).hasRootCauseInstanceOf(IllegalArgumentException.class);
     }
 
@@ -145,10 +164,10 @@ public class BookRepositoryTest {
             "classpath:sql/3_insert_book_data.sql"
     })
     void getBook_thenAssertDmlCount() {
-        // When
+        //When
         Book result = bookRepository.findById(DEFAULT_BOOK_ID).orElseThrow();
 
-        // Then
+        //Then
         assertEquals(DEFAULT_BOOK_ID, result.getId());
         assertEquals(DEFAULT_BOOK_AUTHOR, result.getAuthor());
         assertEquals(DEFAULT_BOOK_TITLE, result.getTitle());
@@ -168,15 +187,15 @@ public class BookRepositoryTest {
             "classpath:sql/3_insert_book_data.sql"
     })
     void getBookById_WithNullArgument_Exception_Test() {
-        // when
+        //When
         Throwable throwable = catchThrowable(() -> bookRepository.findById(null));
 
-        // then
+        //Then
         assertThat(throwable).hasRootCauseInstanceOf(IllegalArgumentException.class);
     }
 
     // get all
-    @DisplayName("Получить все книги. Число select должно равняться 1")
+    @DisplayName("Получить все книги. Число select должно равняться 1.")
     @Test
     @Rollback
     @Sql({"classpath:sql/1_clear_schema.sql",
@@ -206,11 +225,10 @@ public class BookRepositoryTest {
             "classpath:sql/3_insert_book_data.sql"
     })
     void deleteBook_thenAssertDmlCount() {
-        // When
+        //When
         bookRepository.deleteById(DEFAULT_BOOK_ID);
 
-        // Then
-
+        //Then
         assertSelectCount(1);
         assertInsertCount(0);
         assertUpdateCount(0);
@@ -226,10 +244,10 @@ public class BookRepositoryTest {
             "classpath:sql/3_insert_book_data.sql"
     })
     void deleteBook_WithNullArgument_Exception_Test() {
-        // when
+        //When
         Throwable throwable = catchThrowable(() -> bookRepository.deleteById(null));
 
-        // then
+        //Then
         assertThat(throwable).hasRootCauseInstanceOf(IllegalArgumentException.class);
     }
 
@@ -241,10 +259,10 @@ public class BookRepositoryTest {
             "classpath:sql/3_insert_book_data.sql"
     })
     void deleteBook_WithNonExistId_Exception_Test() {
-        // when
+        //When
         Throwable throwable = catchThrowable(() -> bookRepository.deleteById(1509L));
 
-        // then
+        //Then
         assertThat(throwable).isInstanceOf(EmptyResultDataAccessException.class);
 
     }

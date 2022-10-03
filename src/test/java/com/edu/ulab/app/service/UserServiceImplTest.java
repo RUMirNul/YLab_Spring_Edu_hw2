@@ -45,39 +45,44 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Создание пользователя. Должно пройти успешно.")
     void saveUser_Test() {
-        //given
+        //Given
         int userAge = RANDOM.nextInt(1, 100);
         long userId = RANDOM.nextLong(1, 100000);
 
-        UserDto userDto = new UserDto();
-        userDto.setFullName(USER_FULL_NAME);
-        userDto.setTitle(USER_TITLE);
-        userDto.setAge(userAge);
+        UserDto userDto = UserDto.builder()
+                .fullName(USER_FULL_NAME)
+                .title(USER_TITLE)
+                .age(userAge)
+                .build();
 
-        Person person = new Person();
-        person.setFullName(USER_FULL_NAME);
-        person.setTitle(USER_TITLE);
-        person.setAge(userAge);
+        Person person = Person.builder()
+                .fullName(USER_FULL_NAME)
+                .title(USER_TITLE)
+                .age(userAge)
+                .build();
 
 
-        Person savedPerson = new Person();
-        savedPerson.setId(userId);
-        savedPerson.setFullName(USER_FULL_NAME);
-        savedPerson.setTitle(USER_TITLE);
-        savedPerson.setAge(userAge);
+        Person savedPerson = Person.builder()
+                .id(userId)
+                .fullName(USER_FULL_NAME)
+                .title(USER_TITLE)
+                .age(userAge)
+                .build();
 
-        UserDto result = new UserDto();
-        result.setId(userId);
-        result.setFullName(USER_FULL_NAME);
-        result.setTitle(USER_TITLE);
-        result.setAge(userAge);
+        UserDto result = UserDto.builder()
+                .id(userId)
+                .fullName(USER_FULL_NAME)
+                .title(USER_TITLE)
+                .age(userAge)
+                .build();
 
-        //when
+
+        //When
         when(userMapper.userDtoToPerson(userDto)).thenReturn(person);
         when(userRepository.save(person)).thenReturn(savedPerson);
         when(userMapper.personToUserDto(savedPerson)).thenReturn(result);
 
-        //then
+        //Then
         UserDto userDtoResult = userService.createUser(userDto);
         assertEquals(userId, userDtoResult.getId());
         assertEquals(USER_FULL_NAME, userDtoResult.getFullName());
@@ -89,40 +94,45 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Обновление пользователя. Должно пройти успешно.")
     void updateUser_Test() {
-        // given
+        //Given
         int userAge = RANDOM.nextInt(1, 100);
         long userId = RANDOM.nextLong(1, 100000);
 
-        UserDto userDto = new UserDto();
-        userDto.setId(userId);
-        userDto.setFullName(USER_FULL_NAME);
-        userDto.setTitle(USER_TITLE);
-        userDto.setAge(userAge);
+        UserDto userDto = UserDto.builder()
+                .id(userId)
+                .fullName(USER_FULL_NAME)
+                .title(USER_TITLE)
+                .age(userAge)
+                .build();
 
-        Person person = new Person();
-        person.setId(userId);
-        person.setFullName(USER_FULL_NAME);
-        person.setTitle(USER_TITLE);
-        person.setAge(userAge);
+        Person person = Person.builder()
+                .id(userId)
+                .fullName(USER_FULL_NAME)
+                .title(USER_TITLE)
+                .age(userAge)
+                .build();
 
-        Person savedPerson = new Person();
-        savedPerson.setId(userId);
-        savedPerson.setFullName(USER_FULL_NAME);
-        savedPerson.setTitle(USER_TITLE);
-        savedPerson.setAge(userAge);
+        Person savedPerson = Person.builder()
+                .id(userId)
+                .fullName(USER_FULL_NAME)
+                .title(USER_TITLE)
+                .age(userAge)
+                .build();
 
-        UserDto result = new UserDto();
-        result.setId(userId);
-        result.setFullName(USER_FULL_NAME);
-        result.setTitle(USER_TITLE);
-        result.setAge(userAge);
 
-        // when
+        UserDto result = UserDto.builder()
+                .id(userId)
+                .fullName(USER_FULL_NAME)
+                .title(USER_TITLE)
+                .age(userAge)
+                .build();
+
+        //When
         when(userMapper.userDtoToPerson(userDto)).thenReturn(person);
         when(userRepository.save(person)).thenReturn(savedPerson);
         when(userMapper.personToUserDto(savedPerson)).thenReturn(result);
 
-        // then
+        //Then
         UserDto userDtoResult = userService.updateUser(userDto);
         assertEquals(userId, userDtoResult.getId());
         assertEquals(USER_FULL_NAME, userDtoResult.getFullName());
@@ -135,39 +145,29 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Получение пользователя. Должно пройти успешно.")
     void getUserById_Test() {
-        // given
+        //Given
         int userAge = RANDOM.nextInt(1, 100);
         long userId = RANDOM.nextLong(1, 100000);
 
-        UserDto userDto = new UserDto();
-        userDto.setId(userId);
-        userDto.setFullName(USER_FULL_NAME);
-        userDto.setTitle(USER_TITLE);
-        userDto.setAge(userAge);
+        Person person = Person.builder()
+                .id(userId)
+                .fullName(USER_FULL_NAME)
+                .title(USER_TITLE)
+                .age(userAge)
+                .build();
 
-        Person person = new Person();
-        person.setId(userId);
-        person.setFullName(USER_FULL_NAME);
-        person.setTitle(USER_TITLE);
-        person.setAge(userAge);
+        UserDto result = UserDto.builder()
+                .id(userId)
+                .fullName(USER_FULL_NAME)
+                .title(USER_TITLE)
+                .age(userAge)
+                .build();
 
-        Person savedPerson = new Person();
-        savedPerson.setId(userId);
-        savedPerson.setFullName(USER_FULL_NAME);
-        savedPerson.setTitle(USER_TITLE);
-        savedPerson.setAge(userAge);
-
-        UserDto result = new UserDto();
-        result.setId(userId);
-        result.setFullName(USER_FULL_NAME);
-        result.setTitle(USER_TITLE);
-        result.setAge(userAge);
-
-        // when
+        //When
         when(userRepository.findById(userId)).thenReturn(Optional.of(person));
         when(userMapper.personToUserDto(person)).thenReturn(result);
 
-        // then
+        //Then
         UserDto userDtoResult = userService.getUserById(userId);
         assertEquals(userId, userDtoResult.getId());
         assertEquals(USER_FULL_NAME, userDtoResult.getFullName());
@@ -186,13 +186,13 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Удаление пользователя. Должно пройти успешно.")
     void deleteUser_Test() {
-        // given
+        //Given
         long userId = RANDOM.nextLong(1, 100000);
 
-        // when
+        //When
         userService.deleteUserById(userId);
 
-        // then
+        //Then
         verify(userRepository).deleteById(userId);
     }
 }
