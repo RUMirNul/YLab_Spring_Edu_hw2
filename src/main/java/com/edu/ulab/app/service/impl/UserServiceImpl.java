@@ -2,6 +2,7 @@ package com.edu.ulab.app.service.impl;
 
 import com.edu.ulab.app.dto.UserDto;
 import com.edu.ulab.app.entity.Person;
+import com.edu.ulab.app.exception.NotFoundException;
 import com.edu.ulab.app.mapper.UserMapper;
 import com.edu.ulab.app.repository.UserRepository;
 import com.edu.ulab.app.service.UserService;
@@ -74,7 +75,8 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserById(Long id) {
         log.info("Wants get user by user id: {}", id);
 
-        Person receivedUser = userRepository.findById(id).orElse(null);
+        Person receivedUser = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Not found user with id = " + id ));
         log.info("Received user: {}", receivedUser);
 
         UserDto returnedUserDto = userMapper.personToUserDto(receivedUser);
@@ -91,9 +93,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUserById(Long id) {
         log.info("Got delete user by user id: {}", id);
-        if (userRepository.existsById(id)) {
+
+        try {
             userRepository.deleteById(id);
             log.info("User was deleted with id: {}", id);
+        } catch (Exception e) {
+            //ignore
+            log.info("No have user for deleting: {}", id);
         }
     }
 }

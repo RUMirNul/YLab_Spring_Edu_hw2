@@ -2,8 +2,10 @@ package com.edu.ulab.app.service.impl;
 
 import com.edu.ulab.app.dto.BookDto;
 import com.edu.ulab.app.entity.Book;
+import com.edu.ulab.app.exception.NotFoundException;
 import com.edu.ulab.app.mapper.BookMapper;
 import com.edu.ulab.app.repository.BookRepository;
+import com.edu.ulab.app.repository.UserRepository;
 import com.edu.ulab.app.service.BookService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,12 +17,13 @@ import java.util.List;
 public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
-
+    private final UserRepository userRepository;
     private final BookMapper bookMapper;
 
     public BookServiceImpl(BookRepository bookRepository,
-                           BookMapper bookMapper) {
+                           UserRepository userRepository, BookMapper bookMapper) {
         this.bookRepository = bookRepository;
+        this.userRepository = userRepository;
         this.bookMapper = bookMapper;
     }
 
@@ -36,6 +39,8 @@ public class BookServiceImpl implements BookService {
 
         Book book = bookMapper.bookDtoToBook(bookDto);
         log.info("Mapped book DTO to book: {}", book);
+
+        userRepository.findById(bookDto.getUserId()).ifPresent(book::setPerson);
 
         Book savedBook = bookRepository.save(book);
         log.info("Created book: {}", savedBook);
@@ -77,7 +82,8 @@ public class BookServiceImpl implements BookService {
     public BookDto getBookById(Long id) {
         log.info("Wants get book by book id: {}", id);
 
-        Book receivedBook = bookRepository.findById(id).orElse(null);
+        Book receivedBook = bookRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Not found book with id = " + id ));
         log.info("Received book: {}", receivedBook);
 
         BookDto returnedBookDto = bookMapper.bookToBookDto(receivedBook);
@@ -94,9 +100,13 @@ public class BookServiceImpl implements BookService {
     @Override
     public void deleteBookById(Long id) {
         log.info("Got delete book by book id: {}", id);
-        if (bookRepository.existsById(id)) {
+
+        try {
             bookRepository.deleteById(id);
             log.info("Book was deleted with id: {}", id);
+        } catch (Exception e) {
+            //ignore
+            log.info("No have book for deleting: {}", id);
         }
     }
 
@@ -114,4 +124,5 @@ public class BookServiceImpl implements BookService {
 
         return allBooksIdByUserId;
     }
+
 }

@@ -1,7 +1,6 @@
 package com.edu.ulab.app.validation;
 
 import com.edu.ulab.app.dto.UserDto;
-
 public class UserValidator {
 
     /**
